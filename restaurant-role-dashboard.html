@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>饭店点餐系统角色页面</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #edf2f7;
+      --paper: #ffffff;
+      --line: #d7e0ea;
+      --text: #142033;
+      --muted: #637287;
+      --admin: #e76f22;
+      --staff: #2563eb;
+      --customer: #16a34a;
+      --admin-soft: #fff3e8;
+      --staff-soft: #eef5ff;
+      --customer-soft: #ebf9f0;
+      --shadow: 0 20px 48px rgba(15, 23, 42, 0.10);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(231, 111, 34, 0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.10), transparent 24%),
+        linear-gradient(180deg, #f8fafc, var(--bg));
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      padding: 24px;
+    }
+
+    .role-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .app {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      border: 1px solid rgba(148, 163, 184, 0.42);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f97316, #fb923c);
+      color: #fff;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    h1, h2, h3, h4, p { margin: 0; }
+
+    .brand h1 {
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .brand p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .role-switch {
+      display: inline-flex;
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fafc;
+    }
+
+    .role-switch label {
+      padding: 10px 15px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    #role-admin:checked ~ .app label[for="role-admin"],
+    #role-staff:checked ~ .app label[for="role-staff"],
+    #role-customer:checked ~ .app label[for="role-customer"] {
+      color: var(--text);
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .panel {
+      display: none;
+      margin-top: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.42);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: var(--shadow);
+    }
+
+    #role-admin:checked ~ .app .admin-panel,
+    #role-staff:checked ~ .app .staff-panel,
+    #role-customer:checked ~ .app .customer-panel {
+      display: block;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 720px;
+    }
+
+    .sidebar {
+      padding: 22px;
+      border-right: 1px solid var(--line);
+      background: linear-gradient(180deg, #fbfdff, #f3f7fb);
+    }
+
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 9px;
+    }
+
+    .nav a {
+      display: block;
+      padding: 11px 12px;
+      border-radius: 14px;
+      color: #405166;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .nav a.active {
+      color: #fff;
+    }
+
+    .admin-panel .nav a.active { background: var(--admin); }
+    .staff-panel .nav a.active { background: var(--staff); }
+    .customer-panel .nav a.active { background: var(--customer); }
+
+    .main {
+      padding: 24px;
+    }
+
+    .main-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .main-head h2 {
+      font-size: 26px;
+    }
+
+    .main-head p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 780px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff, #f9fbfe);
+    }
+
+    .card span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .admin-panel .card strong { color: var(--admin); }
+    .staff-panel .card strong { color: var(--staff); }
+    .customer-panel .card strong { color: var(--customer); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.45fr 0.95fr;
+      gap: 18px;
+    }
+
+    .grid.equal {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .block {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .block-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 17px 18px 13px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .block-head h3 {
+      font-size: 17px;
+    }
+
+    .block-head small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .block-body {
+      padding: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #e6edf5;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .tag {
+      display: inline-flex;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.admin { background: var(--admin-soft); color: #b9530f; }
+    .tag.staff { background: var(--staff-soft); color: #1d4fc5; }
+    .tag.customer { background: var(--customer-soft); color: #0f8134; }
+    .tag.gray { background: #edf2f7; color: #536273; }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .list-item {
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fafcff;
+    }
+
+    .list-item strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .list-item span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dish {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fbfdff;
+    }
+
+    .dish h4 {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .dish p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .dish footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 13px;
+      font-size: 13px;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #f8fbff;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    @media (max-width: 1100px) {
+      .layout,
+      .grid,
+      .grid.equal,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .menu-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 12px; }
+      .topbar,
+      .main-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .role-switch {
+        width: 100%;
+      }
+      .role-switch label {
+        flex: 1;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <input class="role-input" type="radio" name="role" id="role-admin" checked />
+  <input class="role-input" type="radio" name="role" id="role-staff" />
+  <input class="role-input" type="radio" name="role" id="role-customer" />
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">餐</div>
+        <div>
+          <h1>饭店点餐系统</h1>
+          <p>页面内容对应 E-R 图和功能结构图，展示三类用户各自看到的系统页面。</p>
+        </div>
+      </div>
+      <div class="role-switch">
+        <label for="role-admin">管理员</label>
+        <label for="role-staff">员工</label>
+        <label for="role-customer">顾客</label>
+      </div>
+    </header>
+
+    <section class="panel admin-panel">
+      <div class="layout">
+        <aside class="sidebar">
+          <h2>管理员菜单</h2>
+          <nav class="nav">
+            <a class="active" href="#">操作中心</a>
+            <a href="#">数据维护</a>
+            <a href="#">员工表</a>
+            <a href="#">顾客表</a>
+            <a href="#">餐桌表</a>
+            <a href="#">菜谱表</a>
+            <a href="#">数据查询</a>
+            <a href="#">排行榜查询</a>
+          </nav>
+        </aside>
+        <main class="main">
+          <div class="main-head">
+            <div>
+              <h2>管理员操作中心</h2>
+              <p>管理员看到的是系统级管理页面，内容对应功能结构图中的“数据维护、数据查询、排行榜查询”，并关联 E-R 图中的员工、顾客、餐桌、菜谱、订单、订单细则。</p>
+            </div>
+            <span class="badge">管理员表：编号、姓名、密码</span>
+          </div>
+
+          <div class="cards">
+            <div class="card"><span>员工表</span><strong>工号</strong></div>
+            <div class="card"><span>顾客表</span><strong>顾客编号</strong></div>
+            <div class="card"><span>餐桌表</span><strong>餐桌号</strong></div>
+            <div class="card"><span>菜谱表</span><strong>菜品编号</strong></div>
+          </div>
+
+          <div class="grid">
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <h3>数据维护与查询</h3>
+                  <small>对应功能结构图中管理员分支</small>
+                </div>
+                <span class="tag admin">后台管理</span>
+              </div>
+              <div class="block-body">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>功能</th>
+                      <th>对应数据表</th>
+                      <th>主要字段</th>
+                      <th>用途</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>员工管理</td><td>员工表</td><td>工号、姓名、年龄、性别、密码</td><td>维护员工资料</td></tr>
+                    <tr><td>顾客管理</td><td>顾客表</td><td>顾客编号、姓名、性别、电话</td><td>查询顾客资料</td></tr>
+                    <tr><td>餐桌管理</td><td>餐桌表</td><td>餐桌号、座位数、使用状态</td><td>维护餐桌状态</td></tr>
+                    <tr><td>菜谱管理</td><td>菜谱表</td><td>菜品编号、菜名、类别、售价</td><td>维护菜品信息</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <h3>排行榜查询</h3>
+                  <small>订单细则参照菜谱</small>
+                </div>
+                <span class="tag admin">销售统计</span>
+              </div>
+              <div class="block-body list">
+                <div class="list-item"><strong>菜品销量排行</strong><span>由订单细则中的菜品数量汇总得到。</span></div>
+                <div class="list-item"><strong>菜品信息来源</strong><span>菜谱表提供菜品编号、菜名、类别和售价。</span></div>
+                <div class="list-item"><strong>订单关系</strong><span>订单由员工管理，由顾客消费，并使用餐桌。</span></div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </section>
+
+    <section class="panel staff-panel">
+      <div class="layout">
+        <aside class="sidebar">
+          <h2>员工菜单</h2>
+          <nav class="nav">
+            <a class="active" href="#">操作中心</a>
+            <a href="#">数据维护</a>
+            <a href="#">员工个人信息</a>
+            <a href="#">评价表</a>
+            <a href="#">数据查询</a>
+            <a href="#">订单表</a>
+            <a href="#">订单细则</a>
+            <a href="#">餐桌表</a>
+            <a href="#">顾客表</a>
+          </nav>
+        </aside>
+        <main class="main">
+          <div class="main-head">
+            <div>
+              <h2>员工工作台</h2>
+              <p>员工看到的是业务处理页面，内容对应功能结构图中员工分支的“数据维护”和“数据查询”，主要围绕个人信息、评价表、订单表、订单细则、餐桌表和顾客表。</p>
+            </div>
+            <span class="badge">员工表：工号、姓名、年龄、性别、密码</span>
+          </div>
+
+          <div class="cards">
+            <div class="card"><span>数据维护</span><strong>个人信息</strong></div>
+            <div class="card"><span>数据维护</span><strong>评价表</strong></div>
+            <div class="card"><span>数据查询</span><strong>订单表</strong></div>
+            <div class="card"><span>数据查询</span><strong>餐桌表</strong></div>
+          </div>
+
+          <div class="grid equal">
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <h3>员工数据维护</h3>
+                  <small>对应功能结构图中的数据维护</small>
+                </div>
+                <span class="tag staff">维护</span>
+              </div>
+              <div class="block-body list">
+                <div class="list-item"><strong>员工个人信息</strong><span>工号、姓名、年龄、性别、密码。</span></div>
+                <div class="list-item"><strong>评价表</strong><span>评价编号、顾客编号、订单编号、评分、评价内容。</span></div>
+                <div class="list-item"><strong>员工管理订单</strong><span>一名员工可以管理多张订单。</span></div>
+              </div>
+            </section>
+
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <h3>员工数据查询</h3>
+                  <small>对应功能结构图中的数据查询</small>
+                </div>
+                <span class="tag staff">查询</span>
+              </div>
+              <div class="block-body">
+                <table>
+                  <thead>
+                    <tr><th>查询内容</th><th>对应表</th><th>说明</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>订单信息</td><td>订单表</td><td>订单编号、消费金额、订单时间</td></tr>
+                    <tr><td>订单明细</td><td>订单细则</td><td>菜品数量、消费金额、备注</td></tr>
+                    <tr><td>餐桌信息</td><td>餐桌表</td><td>餐桌号、座位数、使用状态</td></tr>
+                    <tr><td>顾客信息</td><td>顾客表</td><td>顾客编号、姓名、性别、电话</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </section>
+
+    <section class="panel customer-panel">
+      <div class="layout">
+        <aside class="sidebar">
+          <h2>顾客菜单</h2>
+          <nav class="nav">
+            <a class="active" href="#">首页</a>
+            <a href="#">数据维护</a>
+            <a href="#">个人信息</a>
+            <a href="#">数据查询</a>
+            <a href="#">个人消费记录</a>
+            <a href="#">菜谱视图图</a>
+            <a href="#">餐桌表</a>
+            <a href="#">提交订单</a>
+          </nav>
+        </aside>
+        <main class="main">
+          <div class="main-head">
+            <div>
+              <h2>顾客点餐页面</h2>
+              <p>顾客看到的是自助点餐与消费查询页面，内容对应功能结构图中顾客分支的“数据维护”和“数据查询”，包含个人信息、个人消费记录、菜谱视图图和餐桌表。</p>
+            </div>
+            <span class="badge">顾客表：顾客编号、姓名、性别、电话</span>
+          </div>
+
+          <div class="cards">
+            <div class="card"><span>个人信息</span><strong>顾客编号</strong></div>
+            <div class="card"><span>个人消费记录</span><strong>订单表</strong></div>
+            <div class="card"><span>菜谱视图图</span><strong>菜谱表</strong></div>
+            <div class="card"><span>餐桌信息</span><strong>餐桌表</strong></div>
+          </div>
+
+          <div class="grid">
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <h3>菜谱视图图</h3>
+                  <small>顾客浏览菜品并形成订单</small>
+                </div>
+                <span class="tag customer">点餐</span>
+              </div>
+              <div class="block-body">
+                <div class="menu-grid">
+                  <article class="dish">
+                    <h4>招牌牛排</h4>
+                    <p>菜品编号 CP001，菜品类别：主菜。</p>
+                    <footer><strong>¥88</strong><span class="tag customer">菜谱表</span></footer>
+                  </article>
+                  <article class="dish">
+                    <h4>蒜香虾仁意面</h4>
+                    <p>菜品编号 CP002，菜品类别：主食。</p>
+                    <footer><strong>¥68</strong><span class="tag customer">菜谱表</span></footer>
+                  </article>
+                  <article class="dish">
+                    <h4>法式蘑菇汤</h4>
+                    <p>菜品编号 CP003，菜品类别：汤品。</p>
+                    <footer><strong>¥38</strong><span class="tag customer">菜谱表</span></footer>
+                  </article>
+                </div>
+                <div class="note">顾客选择菜品后生成订单表记录，具体菜品数量、消费金额和备注进入订单细则。</div>
+              </div>
+            </section>
+
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <h3>个人消费记录</h3>
+                  <small>顾客消费订单查询</small>
+                </div>
+                <span class="tag customer">查询</span>
+              </div>
+              <div class="block-body list">
+                <div class="list-item"><strong>顾客 消费 订单</strong><span>一名顾客可产生多张订单。</span></div>
+                <div class="list-item"><strong>订单 使用 餐桌</strong><span>订单记录对应餐桌号、座位数和使用状态。</span></div>
+                <div class="list-item"><strong>订单 组成 订单细则</strong><span>订单细则记录菜品数量、消费金额和备注。</span></div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
